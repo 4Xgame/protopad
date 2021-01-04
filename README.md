@@ -1,5 +1,5 @@
 # protopad
-Prototyping and idea pad
+Prototyping and idea pad in prep for a more real game.
 
 Needs a rewrite for collaboration and use of Phaser's tilemaps, plus fixing a few major bugs apparently...
 
