@@ -1,0 +1,44 @@
+<html>
+<head>
+<script src='src/main.js'></script>
+</head>
+<body>
+<style>
+canvas {
+    border: 1px dotted red;
+}
+
+button.tile{
+  display:block;
+  float:left;
+}
+
+button.view{
+  display:block;
+  float:right;
+}
+</style>
+	<button class='tile' data-tile='pasture'>
+	  Pasture
+	</button>
+	<button class='tile' data-tile='farm'>
+	  Farm
+	</button>
+	<button class='tile' data-tile='town'>
+	  Town
+	</button>
+	<button class='tile' data-tile='road'>
+	  Road
+	</button>
+
+	<button class='view' data-view='tiles'>
+	  View Tiles
+	</button>
+	<button class='view' data-view='heatmap'>
+	  View Heatmap
+	</button>
+	<canvas id="canvas" width="600" height="500">
+	 This text is displayed if your browser does not support HTML5 Canvas.
+	</canvas>
+</body>
+</html>
