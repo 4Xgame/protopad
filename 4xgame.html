@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="//cdn.jsdelivr.net/npm/phaser@3.51.0/dist/phaser.min.js"></script>
+  <script src="./scratch.js"></script>
+  <script src="./config.js"></script>
+</head>
+<body>
+
+<script>
+
+////////////Config Stuff////////////
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  parent: "game-container",
+  pixelArt: true,
+  scene: {
+    preload: preload,
+    create: create,
+    update: update
+  }
+};
+
+const game = new Phaser.Game(config);
+let controls;
+
+function preload() {
+  this.load.image("terrain_tiles", "assets/tiles/terrains.png");
+  this.load.image("improvement_tiles", "assets/tiles/improvements.png");
+}
+
+function create() {
+  // When loading a CSV map, make sure to specify the tileWidth and tileHeight
+  // When loading from an array, make sure to specify the tileWidth and tileHeight
+
+  var gameMap = GameMap.create({
+    tileMap: this.make.tilemap({ width: 50, height: 37, tileWidth: 64, tileHeight: 64 }),
+    width: 50,
+    height: 37
+  })
+
+  testMapGenerator.generateSimpleMap(gameMap);
+
+  // Phaser supports multiple cameras, but you can access the default camera like this:
+  var camera = this.cameras.main;
+  camera.setZoom(1.0);
+  camera.roundPixels = true;
+
+  // Set up the arrows to control the camera
+  const cursors = this.input.keyboard.createCursorKeys();
+  controls = new Phaser.Cameras.Controls.FixedKeyControl({
+    camera: camera,
+    left: cursors.left,
+    right: cursors.right,
+    up: cursors.up,
+    down: cursors.down,
+    zoomIn: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+    zoomOut: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z),
+    speed: 1
+  });
+
+  // Constrain the camera so that it isn't allowed to move outside the width/height of tilemap
+  camera.setBounds(0, 0, gameMap.widthInPixels, gameMap.heightInPixels);
+
+  this.add
+    .text(16, 16, "Arrow keys to scroll, A or Z to Zoom", {
+      font: "18px monospace",
+      fill: "#ffffff",
+      padding: { x: 20, y: 10 },
+      backgroundColor: "#000000"
+    })
+    .setScrollFactor(0.5);
+}
+
+function update(time, delta) {
+  controls.update(delta);
+}
+</script>
+
+</body>
+</html>
