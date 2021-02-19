@@ -29,6 +29,8 @@ let controls;
 function preload() {
   this.load.image("terrain_tiles", "assets/tiles/terrains.png");
   this.load.image("improvement_tiles", "assets/tiles/improvements.png");
+  this.load.image("resourcemap_tiles", "assets/tiles/resource_map.png");
+
 }
 
 function create() {
@@ -36,9 +38,10 @@ function create() {
   // When loading from an array, make sure to specify the tileWidth and tileHeight
 
   var gameMap = GameMap.create({
-    tileMap: this.make.tilemap({ width: 50, height: 37, tileWidth: 64, tileHeight: 64 }),
-    width: 50,
-    height: 37
+    game: this,
+    tileMap: this.make.tilemap({ width: 500, height: 370, tileWidth: 64, tileHeight: 64 }),
+    width: 500,
+    height: 370
   })
 
   testMapGenerator.generateSimpleMap(gameMap);

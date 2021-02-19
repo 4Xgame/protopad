@@ -1,42 +1,45 @@
 var roadTerrainType = new TerrainType({
     name: 'road',
-    resourceMap: new TerrainResourceUseMap ({
+    resourceCostMap: {
         food: 6,
         water: 6
-    })
+    }
 })
 
 var riverTerrainType = new TerrainType({
     name: 'rivers',
-    resourceMap: new TerrainResourceUseMap ({
+    resourceCostMap: {
         food: 4,
-        water: 4
-    })
+        water: 0
+    }
 })
 
 var forestTerrainType = new TerrainType({
     name: 'forest',
-    resourceMap: new TerrainResourceUseMap ({
-        food: 15,
-        water: 25
-    })
+    resourceCostMap: {
+        food: 25,
+        water: 35
+    }
 })
 
 var plainsTerrainType = new TerrainType({
     name: 'plains',
-    resourceMap: new TerrainResourceUseMap ({
+    resourceCostMap: {
         food: 15,
         water: 25
-    })
+    }
 })
 
 var mountainTerrainType = new TerrainType({
     name: 'mountain',
-    resourceMap: new TerrainResourceUseMap ({
-        food: 30,
-        water: 50
-    })
+    resourceCostMap: {
+        food: 55,
+        water: 55
+    }
 })
+
+var food = new ResourceType({name: 'food'})
+var water = new ResourceType({name: 'water'})
 
 var testMapGenerator = new MapGenerator({
     terrains: {
@@ -45,5 +48,9 @@ var testMapGenerator = new MapGenerator({
         plains: plainsTerrainType,
         mountain: mountainTerrainType,
         river: riverTerrainType
+    },
+    resources: {
+        food: food,
+        water: water
     }
 })
