@@ -107,6 +107,7 @@ class GameMap {
         const improvementTileSet = this.tileMap.addTilesetImage("improvement_tiles");
         this.improvementTiles = this.tileMap.createBlankLayer('improvement', improvementTileSet, 0, 0); // layer index, tileset, x, y
         this.improvementTiles.depth = 1
+
     }
 
     addResource(resourceType) {
@@ -173,6 +174,18 @@ class GameMap {
             this.cascade(resourceType, remaining, x, y - 1)
         }
     }
+
+    update() {
+        const worldPoint = GameMap.game.input.activePointer.positionToCamera(GameMap.game.cameras.main);
+
+        // Draw tiles (only within the groundLayer)
+        if (GameMap.game.input.manager.activePointer.isDown) {
+                    
+            this.tileMap.putTileAtWorldXY(2, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement");  
+        }
+
+    }
+
 }
 
 class MapGenerator {

@@ -12,8 +12,8 @@
 ////////////Config Stuff////////////
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: window.innerWidth * .9,
+  height: window.innerHeight * .9,
   parent: "game-container",
   pixelArt: true,
   scene: {
@@ -37,14 +37,14 @@ function create() {
   // When loading a CSV map, make sure to specify the tileWidth and tileHeight
   // When loading from an array, make sure to specify the tileWidth and tileHeight
 
-  var gameMap = GameMap.create({
+  this.gameMap = GameMap.create({
     game: this,
     tileMap: this.make.tilemap({ width: 500, height: 370, tileWidth: 64, tileHeight: 64 }),
     width: 500,
     height: 370
   })
 
-  testMapGenerator.generateSimpleMap(gameMap);
+  testMapGenerator.generateSimpleMap(this.gameMap);
 
   // Phaser supports multiple cameras, but you can access the default camera like this:
   var camera = this.cameras.main;
@@ -65,7 +65,8 @@ function create() {
   });
 
   // Constrain the camera so that it isn't allowed to move outside the width/height of tilemap
-  camera.setBounds(0, 0, gameMap.widthInPixels, gameMap.heightInPixels);
+  camera.setBounds(0, 0, this.gameMap.widthInPixels, this.gameMap.heightInPixels);
+
 
   this.add
     .text(16, 16, "Arrow keys to scroll, A or Z to Zoom", {
@@ -79,6 +80,9 @@ function create() {
 
 function update(time, delta) {
   controls.update(delta);
+  this.gameMap.update();
+  
+
 }
 </script>
 
