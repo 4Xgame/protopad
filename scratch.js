@@ -222,7 +222,6 @@ class MapGenerator {
         gameMap.cascade(this.resources.food, 100, 14, 13)
         gameMap.cascade(this.resources.water, 100, 0, 2)
 
-
         return gameMap
     }
 }
