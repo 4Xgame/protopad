@@ -70,6 +70,20 @@ class Improvement {
     }
 }
 
+class ImprovementType {
+    constructor(params) {
+        this.name = params.name
+        this.tileIndex = params.tileIndex
+    }
+
+    generate() {
+        return new Improvement({
+            name : params.name,
+            tileIndex : params.tileIndex
+        })     
+    } 
+}
+
 class GameMap {
     // Must be called in the game's create state
     static create(params) {
@@ -86,6 +100,7 @@ class GameMap {
         this.tileMap = tileMap
         this.terrainTiles = null
         this.resourceTiles = {}
+
 
         // Static as global game state
         GameMap.game = game
@@ -175,15 +190,8 @@ class GameMap {
         }
     }
 
-    update() {
-        const worldPoint = GameMap.game.input.activePointer.positionToCamera(GameMap.game.cameras.main);
-
-        // Draw tiles (only within the groundLayer)
-        if (GameMap.game.input.manager.activePointer.isDown) {
-                    
-            this.tileMap.putTileAtWorldXY(2, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement");  
-        }
-
+    addImprovement(improvementType, worldPoint) {
+        this.tileMap.putTileAtWorldXY(improvementType.tileIndex, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement");  
     }
 
 }

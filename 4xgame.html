@@ -8,7 +8,6 @@
 <body>
 
 <script>
-
 ////////////Config Stuff////////////
 const config = {
   type: Phaser.AUTO,
@@ -67,7 +66,6 @@ function create() {
   // Constrain the camera so that it isn't allowed to move outside the width/height of tilemap
   camera.setBounds(0, 0, this.gameMap.widthInPixels, this.gameMap.heightInPixels);
 
-
   this.add
     .text(16, 16, "Arrow keys to scroll, A or Z to Zoom", {
       font: "18px monospace",
@@ -77,17 +75,35 @@ function create() {
     })
     .setScrollFactor(0.5);
 
+    this.currentimprovement = roadImprovementType;
 
-  
+  document.querySelector("button[data-action = road]").addEventListener('click', () => {
+    this.currentimprovement = roadImprovementType
+  })
+
+  document.querySelector("button[data-action = farm]").addEventListener('click', () => {
+    this.currentimprovement = farmImprovementType
+  })
+
 }
 
 function update(time, delta) {
   controls.update(delta);
-  this.gameMap.update();
-  
+  const worldPoint = GameMap.game.input.activePointer.positionToCamera(GameMap.game.cameras.main);
+
+  // Draw tiles (only within the groundLayer)
+  if (GameMap.game.input.manager.activePointer.isDown) {
+    this.gameMap.addImprovement(this.currentimprovement, worldPoint)          
+  }
 
 }
 </script>
+
+<div id = 'game-container'></div>
+
+<button data-action = "road">Use Road</button>
+<button data-action = "farm">Use Farm</button>
+
 
 </body>
 </html>

@@ -34,6 +34,17 @@ var mountainTerrainType = new TerrainType({
     }
 })
 
+var roadImprovementType = new ImprovementType({
+    name: 'road',
+    tileIndex: 1
+})
+
+var farmImprovementType = new ImprovementType({
+    name: 'farm',
+    tileIndex: 2
+})
+
+
 var food = new ResourceType({name: 'food', tileIndex: 0})
 var water = new ResourceType({name: 'water', tileIndex: 1})
 
