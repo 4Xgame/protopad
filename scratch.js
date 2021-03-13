@@ -1,17 +1,33 @@
+DEBUG = false
+
+window.debug = (callback) => {
+    if (DEBUG) {
+        callback()
+    }
+}
+
 class ResourceType {
     constructor(params) {
-        var {name} = params
+        this.name = params.name
+        this.tileIndex = params.tileIndex
     }
 }
 
 class ResourcePool {
-
+    constructor(params) {
+        this.name = params.name
+        this.resourceType = params.resourceType
+        this.id = ResourcePool.typeId++
+        this.consumers = []
+        this.producers = []
+        this.amount = 0
+    }
 }
+ResourcePool.id = 0
 
 class ResourceProducer {
     constructor() {
     }
-    
 }
 
 class ResourceConsumer {
@@ -20,142 +36,200 @@ class ResourceConsumer {
     
 }
 
-class TerrainResourceUseMap {
-    constructor(params) {
-        this.map = params
-    }
-
-    useResource(resource, amt) {
-        return amt - map[resource]
-    }
-}
-
 class TerrainType {
     constructor(params) {
-        var {name, resourceMap} = params
         this.id = TerrainType.typeId++
-
-        this.name = name;
-        this.resourceMap = resourceMap
+        
+        this.tileIndex = params.tileIndex
+        this.name = params.name
+        this.resourceCostMap = params.resourceCostMap
     }
 
-    generator() {
+    get generator() {
         return this.generateTile.bind(this)
     }
     
-    generateTile() {
-        return Tile.fromTerrainType(this)
+    generateTile(tilemap, x, y) {
+        return new Tile({
+            terrainType: this ,
+            tilemap: tilemap,
+            x: x,
+            y: y
+        })
+    }
+
+    resourceCost(resourceType) {
+        return this.resourceCostMap[resourceType.name || resourceType]
     }
 }
 TerrainType.typeId = 0
 
 class Improvement {
     constructor(params) {
+        var {name} = params
     }
 }
 
-class Tile {
+class ImprovementType {
     constructor(params) {
-        this.terrainType = params.terrainType
+        this.name = params.name
+        this.tileIndex = params.tileIndex
     }
 
-    static fromTerrainType(terrainType) {
-        return new Tile({terrainType: terrainType})
-    }
-
-    // the numbers map to the index in the tileset atlas image
-    terrainRenderValue() {
-        var terrain = {
-            plains: 5,
-            rivers: 1,
-            mountain: 2,
-            forest: 3
-        }
-
-        return terrain[this.terrainType.name] || 0
-    }
+    generate() {
+        return new Improvement({
+            name : params.name,
+            tileIndex : params.tileIndex
+        })     
+    } 
 }
 
 class GameMap {
     // Must be called in the game's create state
     static create(params) {
-        var {tileMap, width, height} = params;
+        var {tileMap, game, width, height} = params;
 
-        return new GameMap(tileMap, width, height)
+        GameMap.map = new GameMap(tileMap, game, width, height)
+        return GameMap.map
     }
 
     // Don't call directly
-    constructor(tileMap, width, height) {
+    constructor(tileMap, game, width, height) {
         this.width = width
         this.height = height
         this.tileMap = tileMap
+        this.terrainTiles = null
+        this.resourceTiles = {}
 
-        this.gameTiles = new Array(width)
 
-        for(var i = 0; i < width; i++) {
-            this.gameTiles[i] = new Array(height);
-        }
+        // Static as global game state
+        GameMap.game = game
+        GameMap.map = null
 
         this.initTileMap()
     }
 
     initTileMap() {
+        this.terrainTiles = new Array(this.width)
+
+        for(var i = 0; i < this.width; i++) {
+            this.terrainTiles[i] = new Array(this.height);
+        }
         const terrainTileSet = this.tileMap.addTilesetImage("terrain_tiles");
-        this.tileMap.createBlankLayer('terrain', terrainTileSet, 0, 0); // layer index, tileset, x, y
+        this.terrainTiles = this.tileMap.createBlankLayer('terrain', terrainTileSet, 0, 0); // layer index, tileset, x, y
+        this.terrainTiles.depth = 0
       
-        const improvementTileSet = this. tileMap.addTilesetImage("improvement_tiles");
-        this.tileMap.createBlankLayer('improvement', improvementTileSet, 0, 0); // layer index, tileset, x, y
+        const improvementTileSet = this.tileMap.addTilesetImage("improvement_tiles");
+        this.improvementTiles = this.tileMap.createBlankLayer('improvement', improvementTileSet, 0, 0); // layer index, tileset, x, y
+        this.improvementTiles.depth = 1
+
     }
 
-    fillTileRect(layer, x, y, width, height, tileGenerator) {
-        for(var i = y; i < y + height; i++) {
-            for(var j = x; j < x + width; j++) {
-                let tile = tileGenerator()
-                this.updateTile('terrain', j, i, tile)
+    addResource(resourceType) {
+        const resourceMapTileSet = this.tileMap.addTilesetImage("resourcemap_tiles");
+        const resourceTileLayer = this.tileMap.createBlankLayer(`${resourceType.name}_resourcemap`, resourceMapTileSet, 0, 0);
+        resourceTileLayer.depth = 2
+        resourceTileLayer.alpha = 0.5
+
+        this.resourceTiles[resourceType.name] = resourceTileLayer
+
+        for(var x = 0; x < this.width; x++) {
+            for(var y = 0; y < this.height; y++) {
+                var resourceTile = this.tileMap.putTileAt(resourceType.tileIndex, x, y, true, `${resourceType.name}_resourcemap`)
+                resourceTile.properties.availabilty = 0
+                resourceTile.alpha = 0
             }
         }
     }
 
-    updateTile(layer, x, y, tile) {        
-        if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
-            debugger;
-        } else {
-            this.tileMap.putTileAt(tile.terrainRenderValue(), x, y, true, layer)
-            this.gameTiles[x][y] = tile
-        } 
+    getTile(layer, x, y) {
+        return this.tileMap.getTileAt(x, y, false, layer)
     }
 
-    cascade(x, y, ) {
-
+    fillTerrain(x, y, width, height, terrainType) {
+        for(var i = y; i < y + height; i++) {
+            for(var j = x; j < x + width; j++) {
+                const terrainTile = this.tileMap.putTileAt(terrainType.tileIndex, j, i, true, 'terrain')
+                terrainTile.properties.terrainType = terrainType
+            }
+        }
     }
+
+    cascade(resourceType, availabilty, x, y) {
+        const resourceTile = this.getTile(`${resourceType.name}_resourcemap`, x, y)
+        const terrainTile = this.getTile('terrain', x, y)
+
+        if (availabilty < 0 || !resourceTile) {
+            return;
+        }
+
+        if (resourceTile.properties.availabilty < availabilty) {
+            resourceTile.properties.availabilty = availabilty
+            resourceTile.alpha = 1.0
+
+            debug(() => {
+                let camera = GameMap.game.cameras.main
+                GameMap.game.add.text(
+                    renderTile.getLeft(camera),
+                    renderTile.getTop(camera),
+                    availabilty, {
+                        font: "18px monospace",
+                        fill: "#ffffff",
+                        padding: { x: 20, y: 10 },
+                        backgroundColor: "#000000"
+                    }
+                )
+            })
+
+            const remaining = availabilty - terrainTile.properties.terrainType.resourceCost(resourceType)
+            
+            this.cascade(resourceType, remaining, x - 1, y)
+            this.cascade(resourceType, remaining, x + 1, y)
+            this.cascade(resourceType, remaining, x, y + 1)
+            this.cascade(resourceType, remaining, x, y - 1)
+        }
+    }
+
+    addImprovement(improvementType, worldPoint) {
+        this.tileMap.putTileAtWorldXY(improvementType.tileIndex, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement");  
+    }
+
 }
 
 class MapGenerator {
     constructor(params) {
-        this.tileMap = null;
+        this.gameMap = null;
         this.terrains = params.terrains
+        this.resources = params.resources
     }
 
-    addTileMap(tileMap) {
-        this.tileMap = tileMap;
+    addTileMap(gameMap) {
+        this.gameMap = gameMap;
     }
 
     // must be called in the game's create state
-    generateSimpleMap(map) {
-        map.fillTileRect('terrain',0,0,50,37,this.terrains.plains.generator())
+    generateSimpleMap(gameMap) {
+        gameMap.addResource(this.resources.food)
+        gameMap.addResource(this.resources.water)
+        
+        gameMap.fillTerrain(0,0,gameMap.width,gameMap.height,this.terrains.plains)
 
-        map.fillTileRect('terrain',3,3,10,5, this.terrains.forest.generator())
-        map.fillTileRect('terrain',2,2,8,6, this.terrains.forest.generator())
-        map.fillTileRect('terrain',5,5,9,14, this.terrains.forest.generator())
+        gameMap.fillTerrain(3,3,10,5, this.terrains.forest)
+        gameMap.fillTerrain(2,2,8,6, this.terrains.forest)
+        gameMap.fillTerrain(5,5,9,14, this.terrains.forest)
 
-        map.fillTileRect('terrain',0,12,9,2,this.terrains.mountain.generator())
-        map.fillTileRect('terrain',8,11,3,2,this.terrains.mountain.generator())
-        map.fillTileRect('terrain',10,9,2,3,this.terrains.mountain.generator())
-        map.fillTileRect('terrain',11,0,2,10,this.terrains.mountain.generator())
+        gameMap.fillTerrain(0,12,9,2,this.terrains.mountain)
+        gameMap.fillTerrain(8,11,3,2,this.terrains.mountain)
+        gameMap.fillTerrain(10,9,2,3,this.terrains.mountain)
+        gameMap.fillTerrain(12,0,2,10,this.terrains.mountain)
 
-        map.fillTileRect('terrain',0,2,30,2,this.terrains.river.generator())
-        map.fillTileRect('terrain',10,2,2,10,this.terrains.river.generator())
+        gameMap.fillTerrain(0,2,30,2,this.terrains.river)
+        gameMap.fillTerrain(10,2,2,10,this.terrains.river)
+        gameMap.fillTerrain(10,10,4,2,this.terrains.river)
+       
+        gameMap.cascade(this.resources.food, 100, 14, 13)
+        gameMap.cascade(this.resources.water, 100, 0, 2)
 
-        return map
+        return gameMap
     }
 }

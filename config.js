@@ -1,49 +1,62 @@
-var roadTerrainType = new TerrainType({
-    name: 'road',
-    resourceMap: new TerrainResourceUseMap ({
-        food: 6,
-        water: 6
-    })
-})
-
 var riverTerrainType = new TerrainType({
     name: 'rivers',
-    resourceMap: new TerrainResourceUseMap ({
+    tileIndex: 1,
+    resourceCostMap: {
         food: 4,
-        water: 4
-    })
+        water: 0
+    }
 })
 
 var forestTerrainType = new TerrainType({
     name: 'forest',
-    resourceMap: new TerrainResourceUseMap ({
-        food: 15,
-        water: 25
-    })
+    tileIndex: 3,
+    resourceCostMap: {
+        food: 25,
+        water: 35
+    }
 })
 
 var plainsTerrainType = new TerrainType({
     name: 'plains',
-    resourceMap: new TerrainResourceUseMap ({
+    tileIndex: 5,
+    resourceCostMap: {
         food: 15,
         water: 25
-    })
+    }
 })
 
 var mountainTerrainType = new TerrainType({
     name: 'mountain',
-    resourceMap: new TerrainResourceUseMap ({
-        food: 30,
-        water: 50
-    })
+    tileIndex: 2,
+    resourceCostMap: {
+        food: 55,
+        water: 55
+    }
 })
+
+var roadImprovementType = new ImprovementType({
+    name: 'road',
+    tileIndex: 1
+})
+
+var farmImprovementType = new ImprovementType({
+    name: 'farm',
+    tileIndex: 2
+})
+
+
+var food = new ResourceType({name: 'food', tileIndex: 0})
+var water = new ResourceType({name: 'water', tileIndex: 1})
 
 var testMapGenerator = new MapGenerator({
     terrains: {
-        road: roadTerrainType,
         forest: forestTerrainType,
         plains: plainsTerrainType,
         mountain: mountainTerrainType,
         river: riverTerrainType
+    },
+    resources: {
+        food: food,
+        water: water
     }
 })

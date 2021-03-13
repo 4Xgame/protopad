@@ -8,12 +8,11 @@
 <body>
 
 <script>
-
 ////////////Config Stuff////////////
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: window.innerWidth * .9,
+  height: window.innerHeight * .9,
   parent: "game-container",
   pixelArt: true,
   scene: {
@@ -29,19 +28,22 @@ let controls;
 function preload() {
   this.load.image("terrain_tiles", "assets/tiles/terrains.png");
   this.load.image("improvement_tiles", "assets/tiles/improvements.png");
+  this.load.image("resourcemap_tiles", "assets/tiles/resource_map.png");
+
 }
 
 function create() {
   // When loading a CSV map, make sure to specify the tileWidth and tileHeight
   // When loading from an array, make sure to specify the tileWidth and tileHeight
 
-  var gameMap = GameMap.create({
-    tileMap: this.make.tilemap({ width: 50, height: 37, tileWidth: 64, tileHeight: 64 }),
-    width: 50,
-    height: 37
+  this.gameMap = GameMap.create({
+    game: this,
+    tileMap: this.make.tilemap({ width: 500, height: 370, tileWidth: 64, tileHeight: 64 }),
+    width: 500,
+    height: 370
   })
 
-  testMapGenerator.generateSimpleMap(gameMap);
+  testMapGenerator.generateSimpleMap(this.gameMap);
 
   // Phaser supports multiple cameras, but you can access the default camera like this:
   var camera = this.cameras.main;
@@ -62,7 +64,7 @@ function create() {
   });
 
   // Constrain the camera so that it isn't allowed to move outside the width/height of tilemap
-  camera.setBounds(0, 0, gameMap.widthInPixels, gameMap.heightInPixels);
+  camera.setBounds(0, 0, this.gameMap.widthInPixels, this.gameMap.heightInPixels);
 
   this.add
     .text(16, 16, "Arrow keys to scroll, A or Z to Zoom", {
@@ -72,12 +74,36 @@ function create() {
       backgroundColor: "#000000"
     })
     .setScrollFactor(0.5);
+
+    this.currentimprovement = roadImprovementType;
+
+  document.querySelector("button[data-action = road]").addEventListener('click', () => {
+    this.currentimprovement = roadImprovementType
+  })
+
+  document.querySelector("button[data-action = farm]").addEventListener('click', () => {
+    this.currentimprovement = farmImprovementType
+  })
+
 }
 
 function update(time, delta) {
   controls.update(delta);
+  const worldPoint = GameMap.game.input.activePointer.positionToCamera(GameMap.game.cameras.main);
+
+  // Draw tiles (only within the groundLayer)
+  if (GameMap.game.input.manager.activePointer.isDown) {
+    this.gameMap.addImprovement(this.currentimprovement, worldPoint)          
+  }
+
 }
 </script>
+
+<div id = 'game-container'></div>
+
+<button data-action = "road">Use Road</button>
+<button data-action = "farm">Use Farm</button>
+
 
 </body>
 </html>
