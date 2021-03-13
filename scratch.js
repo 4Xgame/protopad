@@ -74,6 +74,7 @@ class ImprovementType {
     constructor(params) {
         this.name = params.name
         this.tileIndex = params.tileIndex
+        this.resourcesGenerated = params.resourcesGenerated || []
     }
 
     generate() {
@@ -191,9 +192,11 @@ class GameMap {
     }
 
     addImprovement(improvementType, worldPoint) {
-        this.tileMap.putTileAtWorldXY(improvementType.tileIndex, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement");  
+        const tile = this.tileMap.putTileAtWorldXY(improvementType.tileIndex, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement"); 
+        improvementType.resourcesGenerated.forEach((improvementResource) => {
+             this.cascade(improvementResource.type, improvementResource.availability, tile.x, tile.y)
+        });
     }
-
 }
 
 class MapGenerator {
@@ -227,7 +230,6 @@ class MapGenerator {
         gameMap.fillTerrain(10,2,2,10,this.terrains.river)
         gameMap.fillTerrain(10,10,4,2,this.terrains.river)
        
-        gameMap.cascade(this.resources.food, 100, 14, 13)
         gameMap.cascade(this.resources.water, 100, 0, 2)
 
         return gameMap

@@ -75,10 +75,10 @@ function create() {
     })
     .setScrollFactor(0.5);
 
-    this.currentimprovement = roadImprovementType;
+  this.currentimprovement = roadImprovementType;
 
-  document.querySelector("button[data-action = road]").addEventListener('click', () => {
-    this.currentimprovement = roadImprovementType
+  document.querySelector("button[data-action = house]").addEventListener('click', () => {
+    this.currentimprovement = houseImprovementType
   })
 
   document.querySelector("button[data-action = farm]").addEventListener('click', () => {
@@ -101,7 +101,7 @@ function update(time, delta) {
 
 <div id = 'game-container'></div>
 
-<button data-action = "road">Use Road</button>
+<button data-action = "house">Use House</button>
 <button data-action = "farm">Use Farm</button>
 
 
