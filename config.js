@@ -45,10 +45,13 @@ var roadImprovementType = new ImprovementType({
 var farmImprovementType = new ImprovementType({
     name: 'farm',
     tileIndex: 2,
+    width: 5,
+    height: 5,
+    resourcesRequired: ['food'],
     resourcesGenerated: [
         {
             type: food,
-            availability: 50,
+            availability: 100,
             perTurn: 10
         }
     ]
@@ -56,7 +59,10 @@ var farmImprovementType = new ImprovementType({
 
 var houseImprovementType = new ImprovementType({
     name: 'house',
-    tileIndex: 3
+    tileIndex: 3,
+    width: 2,
+    height: 2,
+    resourcesRequired: ['food']
 })
 
 var testMapGenerator = new MapGenerator({

@@ -75,6 +75,8 @@ class ImprovementType {
         this.name = params.name
         this.tileIndex = params.tileIndex
         this.resourcesGenerated = params.resourcesGenerated || []
+        this.width = params.width || 1
+        this.height = params.height || 1 
     }
 
     generate() {
@@ -156,9 +158,14 @@ class GameMap {
         }
     }
 
+    fillImprovement(x, y, width, height, terrainType) {
+
+    }
+
     cascade(resourceType, availabilty, x, y) {
         const resourceTile = this.getTile(`${resourceType.name}_resourcemap`, x, y)
         const terrainTile = this.getTile('terrain', x, y)
+        const improvementTile = this.getTile('improvement', x, y)
 
         if (availabilty < 0 || !resourceTile) {
             return;
@@ -182,7 +189,11 @@ class GameMap {
                 )
             })
 
-            const remaining = availabilty - terrainTile.properties.terrainType.resourceCost(resourceType)
+            if (improvementTile && improvementTile.properties.resourcesGenerated[resourceType.name]) {
+                var remaining = availabilty
+            } else {
+                var remaining = availabilty - terrainTile.properties.terrainType.resourceCost(resourceType)
+            }
             
             this.cascade(resourceType, remaining, x - 1, y)
             this.cascade(resourceType, remaining, x + 1, y)
@@ -192,10 +203,24 @@ class GameMap {
     }
 
     addImprovement(improvementType, worldPoint) {
-        const tile = this.tileMap.putTileAtWorldXY(improvementType.tileIndex, worldPoint.x, worldPoint.y, true, GameMap.game.cameras.main, "improvement"); 
+        var tile
+        const tilePoint = this.tileMap.worldToTileXY(worldPoint.x, worldPoint.y, true)
+        
+        for(var i = tilePoint.y; i < tilePoint.y + improvementType.height; i++) {
+            for(var j = tilePoint.x; j < tilePoint.x + improvementType.width; j++) {
+                tile = this.tileMap.putTileAt(improvementType.tileIndex, j, i, true, 'improvement')
+                if (!tile.properties.resourcesGenerated) {
+                    tile.properties.resourcesGenerated = {}
+                }
+                improvementType.resourcesGenerated.forEach((improvementResource) => {
+                    tile.properties.resourcesGenerated[improvementResource.type.name] = true
+                })
+            }
+        }
+
         improvementType.resourcesGenerated.forEach((improvementResource) => {
-             this.cascade(improvementResource.type, improvementResource.availability, tile.x, tile.y)
-        });
+            this.cascade(improvementResource.type, improvementResource.availability, tile.x, tile.y)
+        })
     }
 }
 
