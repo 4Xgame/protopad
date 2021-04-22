@@ -34,6 +34,9 @@ var mountainTerrainType = new TerrainType({
     }
 })
 
+var food = new ResourceType({name: 'food', tileIndex: 0})
+var water = new ResourceType({name: 'water', tileIndex: 1})
+
 var roadImprovementType = new ImprovementType({
     name: 'road',
     tileIndex: 1
@@ -41,12 +44,26 @@ var roadImprovementType = new ImprovementType({
 
 var farmImprovementType = new ImprovementType({
     name: 'farm',
-    tileIndex: 2
+    tileIndex: 2,
+    width: 5,
+    height: 5,
+    resourcesRequired: ['food'],
+    resourcesGenerated: [
+        {
+            type: food,
+            availability: 100,
+            perTurn: 10
+        }
+    ]
 })
 
-
-var food = new ResourceType({name: 'food', tileIndex: 0})
-var water = new ResourceType({name: 'water', tileIndex: 1})
+var houseImprovementType = new ImprovementType({
+    name: 'house',
+    tileIndex: 3,
+    width: 2,
+    height: 2,
+    resourcesRequired: ['food']
+})
 
 var testMapGenerator = new MapGenerator({
     terrains: {
